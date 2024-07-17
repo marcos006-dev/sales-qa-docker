@@ -73,6 +73,20 @@ export default defineConfig({
       refresh: true
     }),
     html(),
-    libsWindowAssignment()
-  ]
+    libsWindowAssignment(),
+  ],
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+    hmr: {
+      host: 'localhost',
+    },
+    proxy: {
+       // Proxy WebSocket connections for HMR
+       '/ws': {
+        target: 'http://localhost:5173',
+        ws: true,
+      },
+    }
+},
 });

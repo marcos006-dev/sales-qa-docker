@@ -1,0 +1,87 @@
+services:
+
+    ####################################################################################################
+    # PHP
+    ####################################################################################################
+    php:
+        build: .docker/php
+        container_name: php
+        ports:
+            - 80:80
+            - 5173:5173
+        volumes:
+            - .:/var/www:cached
+        networks:
+            - laravel
+
+    ####################################################################################################
+    # Nginx
+    ####################################################################################################
+    nginx:
+        image: nginx
+        container_name: nginx
+        ports:
+            - 8000:80
+        volumes:
+            - .:/var/www
+            - .docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+            - .docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+        depends_on:
+            - php
+        networks:
+            - laravel
+    ####################################################################################################
+    # DATABASE (MySQL)
+    ####################################################################################################
+    mysql:
+        image: mysql/mysql-server:8.0
+        container_name: mysql_db
+        ports:
+            - 3306:3306
+        volumes:
+            - .docker/db/data:/var/lib/mysql
+            - .docker/logs:/var/log/mysql
+            - .docker/db/my.cnf:/etc/mysql/conf.d/my.cnf
+            - .docker/db/sql:/docker-entrypoint-initdb.d
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: laravel
+            MYSQL_USER: sail
+            MYSQL_PASSWORD: password
+        networks:
+            - laravel
+
+    ####################################################################################################
+    # phpMyAdmin
+    ####################################################################################################
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: phpmyadmin_db
+        ports:
+            - 8080:80
+        links:
+            - mysql
+        environment:
+            PMA_HOST: mysql
+            PMA_PORT: 3306
+            PMA_ARBITRARY: 1
+        volumes:
+            - .docker/phpmyadmin/sessions:/sessions
+        networks:
+            - laravel
+
+    ####################################################################################################
+    # Mailpit
+    ####################################################################################################
+    mail:
+        image: axllent/mailpit:latest
+        container_name: mail
+        ports:
+            - 8025:8025
+            - 1025:1025
+        networks:
+            - laravel
+
+networks:
+    laravel:
+        driver: bridge
