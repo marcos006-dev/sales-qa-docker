@@ -64,3 +64,159 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+
+# Instructivo para levantar el proyecto Laravel con Docker
+
+## Requisitos previos
+
+- **Docker**: Versión utilizada: `24.0.6, build ed223bc`.
+- **Docker Compose**: Versión utilizada: `v2.21.0-desktop.1`.
+- **Chocolatey**
+- **Make**
+
+### Instalar Make
+
+#### Windows:
+
+1. Instalar Chocolatey: [Instrucciones de instalación](https://chocolatey.org/install)
+2. Instalar Make con Chocolatey: [Paquete Make en Chocolatey](https://community.chocolatey.org/packages/make)
+
+#### Linux:
+
+```sh
+sudo apt update
+sudo apt install make
+```
+
+## Pasos para levantar el proyecto en entorno de desarrollo
+
+1. **Clonar el repositorio del proyecto.**
+2. **Crear el archivo de entorno `.env` en base al `.env.example`.** Es importante configurar correctamente el archivo `.env` para evitar fallos en la creación de los contenedores.
+
+### Iniciar los contenedores de desarrollo
+
+Para iniciar los contenedores de desarrollo y construir las imágenes:
+
+```sh
+make dev_install
+```
+
+Si se necesita construir los contenedores sin usar la caché de Docker:
+
+```sh
+make dev_install_no_cache
+```
+
+### Configurar permisos y dependencias
+
+Ejecutar el siguiente comando para configurar los permisos y enlaces simbólicos, e instalar las dependencias de Composer y NPM:
+
+```sh
+make dev_setup
+```
+
+Este comando realiza las siguientes acciones:
+- Configura los permisos para las carpetas `storage` y `bootstrap/cache`.
+- Instala las dependencias de Composer.
+- Instala las dependencias de NPM.
+- Ejecuta el comando para crear el enlace simbólico.
+
+### Ejecutar migraciones y seeders
+
+Para ejecutar las migraciones y sembrar la base de datos:
+
+```sh
+make dev_migration
+```
+
+### Iniciar el servidor de desarrollo con Vite
+
+Para ejecutar Vite en modo desarrollo con hot module replacement:
+
+```sh
+make dev_vite
+```
+
+### Limpiar el entorno de desarrollo
+
+Para detener y limpiar los contenedores de desarrollo:
+
+```sh
+make dev_clear
+```
+
+## Pasos para levantar el proyecto en entorno de producción
+
+1. **Clonar el repositorio del proyecto.**
+2. **Crear el archivo de entorno `.env` en base al `.env.example`.** Es importante configurar correctamente el archivo `.env` para evitar fallos en la creación de los contenedores.
+
+### Iniciar los contenedores de producción
+
+Para iniciar los contenedores de producción y construir las imágenes:
+
+```sh
+make prod_install
+```
+
+### Configurar permisos y dependencias
+
+Ejecutar el siguiente comando para configurar los permisos e instalar las dependencias de Composer y NPM:
+
+```sh
+make prod_setup
+```
+
+Este comando realiza las siguientes acciones:
+- Configura los permisos para las carpetas `storage` y `bootstrap/cache`.
+- Instala las dependencias de Composer.
+- Instala las dependencias de NPM.
+
+### Ejecutar migraciones
+
+Para ejecutar las migraciones:
+
+```sh
+make prod_migrate
+```
+
+### Compilar los assets con Vite en modo producción
+
+Para compilar los assets con Vite en modo producción:
+
+```sh
+make prod_vite
+```
+
+### Limpiar el entorno de producción
+
+Para detener y limpiar los contenedores de producción:
+
+```sh
+make prod_clear
+```
+
+## Acceder a la terminal de los contenedores
+
+### Acceso a la terminal del contenedor PHP
+
+```sh
+make sshphp
+```
+
+### Acceso a la terminal del contenedor MySQL
+
+```sh
+make sshmysql
+```
+
+### Acceso a la terminal del contenedor Nginx
+
+```sh
+make sshnginx
+```
+
+## Notas adicionales
+
+- Se borraron los archivos `package.lock` y `yarn.lock` porque generaban errores al momento de instalar los paquetes. Se recomienda borrar los `^` de los `package.json` y `composer.json` para evitar que busquen una versión superior a la indicada y así prevenir conflictos.
+- Al momento de levantar el proyecto, este puede funcionar un poco lento debido a limitaciones propias de Windows. Se recomienda instalar Ubuntu a través de la Microsoft Store y clonar el proyecto allí para una inicialización más rápida.
