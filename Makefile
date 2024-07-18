@@ -1,7 +1,6 @@
 # Makefile para ejecutar un proyecto Laravel con Sail
 
 # Variables
-DOCKER_COMPOSE = ./vendor/bin/sail
 APP_NAME = php
 
 # Desarrollo
@@ -17,6 +16,7 @@ dev_setup:
 	docker-compose -f docker-compose.dev.yml exec $(APP_NAME) bash -c "chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache && chmod -R 775 /var/www/storage /var/www/bootstrap/cache"
 	docker-compose -f docker-compose.dev.yml exec $(APP_NAME) composer install
 	docker-compose -f docker-compose.dev.yml exec $(APP_NAME) npm install
+	docker-compose -f docker-compose.dev.yml exec $(APP_NAME) php artisan key:generate
 	docker-compose -f docker-compose.dev.yml exec $(APP_NAME) php artisan storage:link
 
 dev_migration:
@@ -25,6 +25,9 @@ dev_migration:
 
 dev_vite:
 	docker-compose -f docker-compose.dev.yml exec $(APP_NAME) npm run dev --watch
+
+dev_migrate:
+	docker-compose -f docker-compose.dev.yml exec $(APP_NAME) php artisan migrate
 
 dev_clear:
 	docker-compose -f docker-compose.dev.yml down
@@ -38,6 +41,8 @@ prod_setup:
 	docker-compose -f docker-compose.prod.yml exec $(APP_NAME) bash -c "chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache && chmod -R 775 /var/www/storage /var/www/bootstrap/cache"
 	docker-compose -f docker-compose.prod.yml exec $(APP_NAME) composer install --no-dev
 	docker-compose -f docker-compose.prod.yml exec $(APP_NAME) npm install
+	docker-compose -f docker-compose.dev.yml exec $(APP_NAME) php artisan key:generate
+	docker-compose -f docker-compose.dev.yml exec $(APP_NAME) php artisan storage:link
 
 prod_migration:
 	docker-compose -f docker-compose.prod.yml exec $(APP_NAME) php artisan migrate:fresh --seed
@@ -46,20 +51,21 @@ prod_migration:
 prod_clear:
 	docker-compose -f docker-compose.prod.yml down
 
+prod_migrate:
+	docker-compose -f docker-compose.prod.yml exec $(APP_NAME) php artisan migrate
+
 prod_vite:
 	docker-compose -f docker-compose.prod.yml exec $(APP_NAME) npm run build
 
-prod_migrate:
-	docker-compose -f docker-compose.prod.yml exec $(APP_NAME) php artisan migrate
 
 # Comandos para los contenedores
 
 # acceso a la terminal de los contenedores
 sshphp:
-	$(DOCKER_COMPOSE) exec $(APP_NAME) bash
+	docker-compose exec php bash
 
 sshmysql:
-	$(DOCKER_COMPOSE) exec mysql bash
+	docker-compose exec mysql bash
 
 sshnginx:
-	$(DOCKER_COMPOSE) exec nginx bash
+	docker-compose exec nginx bash
